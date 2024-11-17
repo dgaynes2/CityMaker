@@ -1,0 +1,74 @@
+import random
+
+import Data as data
+from Data import ColorData, GridData, MapData
+
+
+def place_intersections():
+    for x, y in MapData.cells:
+        if (x % GridData.spacing == 0 and x > 0) and (
+            y % GridData.spacing == 0 and y > 0
+        ):
+            # (C)rossroads
+            MapData.cells[(x - 1, y - 1)] = "C"
+            MapData.intersections[x - 1, y - 1] = "C"
+
+
+def determine_intersection_type(runs: int = GridData.runs):
+    """Create roads between intersections"""
+
+    for _ in range(runs):
+        for x, y in MapData.intersections:
+            road_direction = random.randint(0, 3)
+            update = None
+
+            match road_direction:
+                case 0:  # left
+                    update = {
+                        (x - z, y): "H"
+                        for z in range(1, GridData.spacing)
+                        if x - z >= 0
+                    }
+                case 1:  # right
+                    update = {
+                        (x + z, y): "H"
+                        for z in range(1, GridData.spacing)
+                        if x + z <= GridData.rows
+                    }
+                case 2:  # up
+                    update = {
+                        (x, y - z): "V"
+                        for z in range(1, GridData.spacing)
+                        if y - z >= 0
+                    }
+                case 3:  # down
+                    update = {
+                        (x, y + z): "V"
+                        for z in range(1, GridData.spacing)
+                        if y + z <= GridData.columns
+                    }
+            MapData.cells.update(update)
+
+
+def correct_intersections():
+    """Reshape intersections based on surrounding road configuration"""
+
+    for x, y in MapData.intersections:
+        road_count = 0
+        if MapData.cells[x - 1, y] != data.BLANK:  # left
+            road_count += 1
+        if MapData.cells[x + 1, y] != data.BLANK:  # right
+            road_count += 2
+        if MapData.cells[x, y - 1] != data.BLANK:  # up
+            road_count += 4
+        if MapData.cells[x, y + 1] != data.BLANK:  # down
+            road_count += 8
+
+        MapData.cells[(x, y)] = data.INTERSECTION_TYPES[road_count]
+        MapData.intersections[(x, y)] = data.INTERSECTION_TYPES[road_count]
+
+
+def all_road_logic():
+    place_intersections()
+    determine_intersection_type()
+    correct_intersections()
