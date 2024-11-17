@@ -1,0 +1,43 @@
+import tkinter as tk
+
+from Data import ColorData, GridData, MapData
+import Draw
+import RoadLogic
+import River
+import BuildingLogic
+
+
+class MapMaker:
+    def __init__(self, win: tk.Tk):
+        self.win = win
+        self.canvas = tk.Canvas(
+            self.win,
+            width=GridData.rows * GridData.grid_size,
+            height=GridData.columns * GridData.grid_size,
+            bg="white",
+        )
+        self.canvas.pack()
+
+
+    def run(self):
+        Draw.draw_grid(self.canvas)
+        RoadLogic.all_road_logic()
+        River.draw_river(self.canvas)
+        BuildingLogic.place_buildings()
+        for cell in MapData.cells:
+            Draw.draw_buildings(self.canvas, cell)
+            Draw.draw_road_type(MapData.cells[cell], self.canvas, cell)
+
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry(
+        f"{GridData.rows * GridData.grid_size}x{GridData.columns * GridData.grid_size}"
+    )
+    root.resizable(False, False)
+    m = MapMaker(root)
+    m.run()
+    m.win.mainloop()
+
+    # RoadLogic.print_current_map()
