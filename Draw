@@ -1,0 +1,172 @@
+from Data import ColorData, GridData, MapData
+
+
+def draw_grid(canvas):
+    """Create and draw grid_lines on canvas"""
+
+    for h in range(GridData.rows):  # (h)orizontal lines
+        canvas.create_line(
+            0,
+            h * GridData.grid_size,
+            GridData.columns * GridData.grid_size,
+            h * GridData.grid_size,
+            fill=ColorData.grid,
+        )
+
+    for v in range(GridData.columns):  # (v)ertical lines
+        canvas.create_line(
+            v * GridData.grid_size,
+            0,
+            v * GridData.grid_size,
+            GridData.rows * GridData.grid_size,
+            fill=ColorData.grid,
+        )
+
+
+def draw_left(canvas, coords, color, thickness):
+    """Draws a line from the left side to the center"""
+
+    x = coords[0] * GridData.grid_size
+    y = coords[1] * GridData.grid_size
+
+    canvas.create_line(
+        x,
+        y + GridData.grid_size // 2,
+        x + GridData.grid_size // 2,
+        y + GridData.grid_size // 2,
+        width=thickness,
+        fill=color,
+    )
+
+
+def draw_right(canvas, coords, color, thickness):
+    """Draws a line from the righy side to the center"""
+
+    x = coords[0] * GridData.grid_size
+    y = coords[1] * GridData.grid_size
+
+    canvas.create_line(
+        x + GridData.grid_size // 2,
+        y + GridData.grid_size // 2,
+        x + GridData.grid_size,
+        y + GridData.grid_size // 2,
+        width=thickness,
+        fill=color,
+    )
+
+
+def draw_up(canvas, coords, color, thickness):
+    """Draws a line from the top side to the center"""
+
+    x = coords[0] * GridData.grid_size
+    y = coords[1] * GridData.grid_size
+
+    canvas.create_line(
+        x + GridData.grid_size // 2,
+        y,
+        x + GridData.grid_size // 2,
+        y + GridData.grid_size // 2,
+        width=thickness,
+        fill=color,
+    )
+
+
+def draw_down(canvas, coords, color, thickness):
+    """Draws a line from the bottom side to the center"""
+
+    x = coords[0] * GridData.grid_size
+    y = coords[1] * GridData.grid_size
+
+    canvas.create_line(
+        x + GridData.grid_size // 2,
+        y + GridData.grid_size // 2,
+        x + GridData.grid_size // 2,
+        y + GridData.grid_size,
+        width=thickness,
+        fill=color,
+    )
+
+
+def draw_direction(canvas, coords, color, thickness, directions):
+    """Draw road or bridge"""
+
+    if "U" in directions:
+        draw_up(canvas, coords, color, thickness)
+    if "D" in directions:
+        draw_down(canvas, coords, color, thickness)
+    if "L" in directions:
+        draw_left(canvas, coords, color, thickness)
+    if "R" in directions:
+        draw_right(canvas, coords, color, thickness)
+
+
+def draw_road_type(type_, canvas, coords):
+    """Determine road shape"""
+
+    road_directions = {
+        "V": "UD",
+        "H": "LR",
+        "LU": "LU",
+        "LD": "LD",
+        "RU": "RU",
+        "RD": "RD",
+        "TU": "LRU",
+        "TD": "LRD",
+        "TL": "LUD",
+        "TR": "RUD",
+        "C": "LRUD",
+        "VW": "UD",
+        "HW": "LR",
+        "LUW": "LU",
+        "LDW": "LD",
+        "RUW": "RU",
+        "RDW": "RD",
+        "TUW": "LRU",
+        "TDW": "LRD",
+        "TLW": "LUD",
+        "TRW": "RUD",
+        "CW": "LRUD",
+    }
+
+    color = ColorData.bridge if type_.endswith("W") else ColorData.road
+    thickness = (
+        GridData.bridge_thickness if type_.endswith("W") else GridData.road_thickness
+    )
+
+    directions = road_directions.get(type_, "")
+    draw_direction(canvas, coords, color, thickness, directions)
+
+
+def draw_water(canvas):
+    """Draw square to represent water"""
+
+    canvas.create_rectangle(
+        MapData.current_water[0] * GridData.grid_size,
+        MapData.current_water[1] * GridData.grid_size,
+        MapData.current_water[0] * GridData.grid_size + GridData.grid_size,
+        MapData.current_water[1] * GridData.grid_size + GridData.grid_size,
+        fill=ColorData.river,
+        outline=ColorData.river,
+    )
+
+
+def draw_building(canvas, coords):
+    """Draw black box in cell to represent building"""
+
+    x = coords[0] * GridData.grid_size
+    y = coords[1] * GridData.grid_size
+
+    canvas.create_rectangle(
+        x + GridData.grid_size // 4,  # // 4 -> building smaller than cell
+        y + GridData.grid_size // 4,
+        x + GridData.grid_size - GridData.grid_size // 4,
+        y + GridData.grid_size - GridData.grid_size // 4,
+        fill=ColorData.building,
+    )
+
+
+def draw_buildings(canvas, coords):
+    """Draw building on map wherever B is"""
+
+    if MapData.cells[coords] == "B":
+        draw_building(canvas, coords)
