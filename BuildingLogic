@@ -1,0 +1,47 @@
+import random
+
+import Data as data
+from Data import ColorData, GridData, MapData
+
+
+def place_buildings():
+    """Place buildings next to roads"""
+
+    intersection_types = [i for i in data.INTERSECTION_TYPES.values() if i != "B"]
+
+    for x, y in MapData.cells:
+        if MapData.cells[(x, y)] == data.BLANK:
+            if (
+                (
+                    x - 1 > 0
+                    and y - 1 > 0
+                    and MapData.cells[(x - 1, y - 1)] in intersection_types
+                )
+                or (y - 1 > 0 and MapData.cells[(x, y - 1)] in intersection_types)
+                or (
+                    x + 1 < GridData.rows
+                    and y - 1 > 0
+                    and MapData.cells[(x + 1, y - 1)] in intersection_types
+                )
+                or (x - 1 > 0 and MapData.cells[x - 1, y] in intersection_types)
+                or (
+                    x + 1 < GridData.columns
+                    and MapData.cells[x + 1, y] in intersection_types
+                )
+                or (
+                    x - 1 > 0
+                    and y + 1 < GridData.rows
+                    and MapData.cells[x - 1, y + 1] in intersection_types
+                )
+                or (
+                    y + 1 < GridData.rows
+                    and MapData.cells[x, y + 1] in intersection_types
+                )
+                or (
+                    x + 1 < GridData.columns
+                    and y + 1 < GridData.rows
+                    and MapData.cells[x + 1, y + 1] in intersection_types
+                )
+            ):
+                if random.randint(0, 100) >= GridData.density:
+                    MapData.cells[(x, y)] = "B"
